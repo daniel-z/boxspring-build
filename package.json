@@ -1,0 +1,22 @@
+{
+  "name": "boxspring-build",
+  "version": "0.0.0",
+  "description": "For CouchDB and Kan.so. Before pushing, updates \"rewrites.js\", generates \"templates.js\", and produces \"index.js\" via Browserify",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rranauro/boxspring-build.git"
+  },
+  "keywords": [
+    "couchdb",
+    "kanso"
+  ],
+  "author": "Ron Ranauro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rranauro/boxspring-build/issues"
+  },
+  "homepage": "https://github.com/rranauro/boxspring-build"
+}

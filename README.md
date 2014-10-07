@@ -1,4 +1,4 @@
 boxspring-build
 ===============
 
-Build utility assembles html templates from fragments and prepares the design document for "kanso push"
+For CouchDB and Kan.so. Before pushing, updates "rewrites.js", generates "templates.js", and produces "index.js" via Browserify
