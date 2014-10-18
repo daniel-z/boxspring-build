@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require('underscore')
-, fs = module.require('fs');
+, fs = module.require('fs')
 
 , writeFile = function(file, data, handler) {		
 	fs.writeFile(file, data, function (err) {
@@ -81,8 +81,8 @@ var parseTemplates = function(root, matches, doc, callback) {
 
 var childProcess = require('child_process');
 
-var runBrowserify = function(doc, callback) {
-	var build = childProcess.exec('browserify app.js -o src/index.js -d', 
+var runBrowserify = function(doc, settings, callback) {
+	var build = childProcess.exec(settings.browserify_command, 
 			function (error, stdout, stderr) {
 		if (error) {
 			console.log(error.stack);
@@ -110,7 +110,12 @@ module.exports = {
     run: function (root, path, settings, doc, callback) {
 					
 		// apply the settings object (with 'baseURL' to the rewrites string)
-		doc.lib.rewrites = _.template(doc.lib.rewrites)(settings);
+		if (settings.baseURL) {
+			doc.lib.rewrites = _.template(doc.lib.rewrites)(settings);
+		} else {
+			console.log('Warning: missing "baseURL" property on setttings object.', settings);
+			return callback(null, doc);
+		}
 
 		// assemble the 'exports.templates' module
 		settings._utils.find(path, new RegExp(/template.html/), function(err, matches) {
@@ -118,12 +123,12 @@ module.exports = {
 			if (matches.length) {
 				// if we got templates, parse them into a templates.js module
 				parseTemplates(path, matches, doc, function() {
-					runBrowserify(doc, callback);
+					runBrowserify(doc, settings, callback);
 				});
 			} else {
 				
 				// just build the source
-				runBrowserify(doc, callback);
+				runBrowserify(doc, settings, callback);
 			}
 		});
     }
