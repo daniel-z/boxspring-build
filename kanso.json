@@ -1,6 +1,6 @@
 {
   "name": "boxspring-build",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "url": "https://github.com/rranauro/boxspring-build",
   "categories": ["build-tools"],
   "description": "Updates rewrites.js, generates templates.js, and index.js via Browserify",
@@ -8,6 +8,7 @@
     "modules": null
   },
   "preprocessors": {
-      "add": "build/add"
+	"templates": "build/templates",
+    "add": "build/browserify"
   }
 }
