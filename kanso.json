@@ -9,6 +9,6 @@
   },
   "preprocessors": {
 	"templates": "build/templates",
-    "add": "build/browserify"
+    "browserify": "build/browserify"
   }
 }
