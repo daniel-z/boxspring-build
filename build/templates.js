@@ -49,7 +49,7 @@ var _ = require('underscore')
 var exportsTemplate = ['templates["<%= id %>"] = ',
 		'_.template( _.unescape("<%= text %>") );',
 		'\n\n'].join('')
-, exportsFile = ['var _ = require("./base-utils")._;',
+, exportsFile = ['var _ = _ || require("underscore")._;',
 		'var templates = {};\n', 
 		'<%= exports_content %>\n',
 		'module.exports = templates;\n'].join('\n');
@@ -85,44 +85,66 @@ var parseTemplates = function(matches, callback) {
 
 module.exports = {
 	before: ["attachments", "modules"],
-    run: function (root, path, settings, doc, callback) {
+    run: function (root, path, settings, doc, onFinish) {
+		var indexHtml = path + '/index.html';		
 
 		async.waterfall([
 			
-			function(readTemplates) {
+			// get the timestamp of the './lib/templates.js'
+			function(callback) {
+				fs.stat(path + '/lib/templates.js', function(err, stat) {
+					callback(null, err ? 0 : new Date(stat.mtime).valueOf());
+				});
+			},
+			
+			// get the list of templates
+			function(mtime, callback) {
+				settings._utils.find(path, new RegExp(/template.html/), function(err, matches) {
+					
+					// now loop over each file and compare its mtime to the previously generated mtime
+					async.map([indexHtml].concat(matches), fs.stat, function(err, results) {
+						
+					    // results is now an array of stats for each file
+						return callback(null, matches, ((_.filter(results, function(result) { 
+							return new Date(result.mtime).valueOf() > mtime; }).length > 0) && matches.length));
+					});
+				});
+			},
+			
+			function(matches, reCompile, callback) {
+				
+				if (!reCompile) {
+					return callback(null, null, null, reCompile);
+				}
+				
+				// gets rid of unwanted characters in 'index.html' and includes it in our compilations of formatted templates.
 				readFile(path + '/index.html', function(err, data) {
-					readTemplates(null, 
+					callback(null, matches,  
 						_.template(exportsTemplate)(script('index-html', 
-								_.escape( data.split('\n').join('').replace(/[^\x00-\x7F]/g, "") ) , '')));
+								_.escape( data.split('\n').join('').replace(/[^\x00-\x7F]/g, "") ) , '')), reCompile);
 				});
 			},
 		
-			function(indexFile, done) {
-								
+			function(matches, indexFile, reCompile, callback) {
+				
+				
+				if (!reCompile) {
+					return callback();
+				}
+				
 				// assemble the 'exports.templates' module
-				// fetch all files and filter in template.html files.
-				settings._utils.find(path, new RegExp(/template.html/), function(err, matches) {
-
-					if (matches.length) {
-						
-						// if we got templates, parse them into a templates.js module
-						parseTemplates(matches, function(e, result) {
-							writeFile(path + '/lib/templates.js', 
-								_.template(exportsFile)({'exports_content': [ indexFile ].concat(result).join('')}), 
-										function(err, response) {
-								return done();
-							});
-						});
-					} else {
-
-						// just build the source
-						done();
-					}
+				// if we got templates, parse them into a templates.js module
+				parseTemplates(matches, function(e, result) {
+					writeFile(path + '/lib/templates.js', 
+						_.template(exportsFile)({'exports_content': [ indexFile ].concat(result).join('')}), 
+								function(err, response) {
+						return callback();
+					});
 				});
 			}
 			
 		], function() {
-			callback(null, doc);
+			onFinish(null, doc);
 		});
     }
 };
