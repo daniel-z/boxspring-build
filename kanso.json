@@ -9,6 +9,6 @@
   },
   "preprocessors": {
 	"templates": "build/templates",
-    "browserify": "build/browserify"
+    "commands": "build/commands"
   }
 }
