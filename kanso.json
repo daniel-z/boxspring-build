@@ -1,6 +1,6 @@
 {
   "name": "boxspring-build",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "url": "https://github.com/rranauro/boxspring-build",
   "categories": ["build-tools"],
   "description": "Updates rewrites.js, generates templates.js, and index.js via Browserify",
