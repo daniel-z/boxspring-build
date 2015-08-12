@@ -100,7 +100,15 @@ module.exports = {
 			// get the list of templates
 			function(mtime, callback) {
 				settings._utils.find(path, new RegExp(/template.html/), function(err, matches) {
-					
+					if(err) {
+						throw err;
+					}
+
+					if(!matches) {
+						callback(null);
+						return;
+					}
+
 					// now loop over each file and compare its mtime to the previously generated mtime
 					async.map([indexHtml].concat(matches), fs.stat, function(err, results) {
 						
